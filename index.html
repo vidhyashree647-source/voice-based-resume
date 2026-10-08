@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceResume AI - Voice-Based Resume Builder</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Welcome Modal Overlay -->
+    <div id="welcome-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="brand-badge">
+                    <span class="mic-icon-pulse">🎤</span>
+                    <span class="brand-name">VoiceResume AI</span>
+                </div>
+                <span class="version-tag">Text & Speech Analysis Project</span>
+            </div>
+            <div class="modal-body">
+                <h2>Build your professional resume using your voice.</h2>
+                <p>Speak naturally about your education, skills, projects, and work experience. Our AI system transcribes, extracts key information, and generates a polished resume automatically.</p>
+                
+                <div class="permission-status-box" id="modal-mic-status">
+                    <span class="status-dot warning"></span>
+                    <span class="status-text">Microphone status: Checking permission...</span>
+                </div>
+
+                <div class="workflow-steps">
+                    <div class="step-item">
+                        <span class="step-num">1</span>
+                        <span>🎤 Speak</span>
+                    </div>
+                    <div class="step-arrow">➔</div>
+                    <div class="step-item">
+                        <span class="step-num">2</span>
+                        <span>📝 Transcribe</span>
+                    </div>
+                    <div class="step-arrow">➔</div>
+                    <div class="step-item">
+                        <span class="step-num">3</span>
+                        <span>🧠 Extract</span>
+                    </div>
+                    <div class="step-arrow">➔</div>
+                    <div class="step-item">
+                        <span class="step-num">4</span>
+                        <span>📄 Build</span>
+                    </div>
+                </div>
+
+                <div class="browser-notice">
+                    <span class="info-icon">ℹ️</span>
+                    <p><strong>Note:</strong> Voice recognition uses the browser's Web Speech API. Microphone permission is required, and speech recognition availability may vary by browser.</p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-start-voice-welcome" class="btn btn-primary btn-glow">
+                    <span>🎤 Start Voice Resume</span>
+                </button>
+                <button id="btn-enter-manual-welcome" class="btn btn-secondary">
+                    <span>✍️ Enter Manually</span>
+                </button>
+                <button id="btn-try-demo-welcome" class="btn btn-accent">
+                    <span>⚡ Try Demo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div class="app-container">
+        
+        <!-- Header Bar -->
+        <header class="top-header">
+            <div class="header-left">
+                <button id="toggle-sidebar-btn" class="icon-btn mobile-only" title="Toggle Sidebar">☰</button>
+                <div class="logo">
+                    <span class="logo-icon">🎙️</span>
+                    <div class="logo-text">
+                        <h1>VoiceResume <span class="accent-text">AI</span></h1>
+                        <span class="sub-logo">Speech to Resume Engine</span>
+                    </div>
+                </div>
+                <div class="mic-status-pill" id="header-mic-pill">
+                    <span class="status-dot inactive" id="mic-dot"></span>
+                    <span id="mic-status-label">Mic Ready</span>
+                </div>
+            </div>
+
+            <div class="header-center">
+                <div class="template-selector-header">
+                    <label>Template:</label>
+                    <div class="template-options">
+                        <button class="template-btn active" data-template="modern">Modern</button>
+                        <button class="template-btn" data-template="classic">Classic</button>
+                        <button class="template-btn" data-template="minimal">Minimal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button id="btn-try-demo" class="btn btn-sm btn-accent" title="Populate Sample Demo Data">
+                    <span>⚡ Try Demo</span>
+                </button>
+                <button id="btn-save" class="btn btn-sm btn-secondary" title="Save Resume Data to LocalStorage">
+                    <span>💾 Save</span>
+                </button>
+                <button id="btn-load" class="btn btn-sm btn-secondary" title="Load Saved Resume">
+                    <span>📂 Load</span>
+                </button>
+                <button id="btn-clear" class="btn btn-sm btn-outline-danger" title="Clear All Data">
+                    <span>🗑️ Clear</span>
+                </button>
+                <button id="btn-print" class="btn btn-sm btn-primary" title="Print or Save as PDF">
+                    <span>🖨️ Download / Print</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout Split -->
+        <div class="main-layout">
+            
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="nav-menu">
+                    <a href="#section-voice" class="nav-item active" data-target="panel-voice">
+                        <span class="nav-icon">🎤</span>
+                        <span class="nav-label">Voice Input</span>
+                    </a>
+                    <a href="#section-personal" class="nav-item" data-target="panel-personal">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-label">Personal Details</span>
+                    </a>
+                    <a href="#section-objective" class="nav-item" data-target="panel-objective">
+                        <span class="nav-icon">🎯</span>
+                        <span class="nav-label">Objective</span>
+                    </a>
+                    <a href="#section-education" class="nav-item" data-target="panel-education">
+                        <span class="nav-icon">🎓</span>
+                        <span class="nav-label">Education</span>
+                    </a>
+                    <a href="#section-skills" class="nav-item" data-target="panel-skills">
+                        <span class="nav-icon">🛠️</span>
+                        <span class="nav-label">Skills</span>
+                    </a>
+                    <a href="#section-projects" class="nav-item" data-target="panel-projects">
+                        <span class="nav-icon">🚀</span>
+                        <span class="nav-label">Projects</span>
+                    </a>
+                    <a href="#section-experience" class="nav-item" data-target="panel-experience">
+                        <span class="nav-icon">💼</span>
+                        <span class="nav-label">Experience</span>
+                    </a>
+                    <a href="#section-certifications" class="nav-item" data-target="panel-certifications">
+                        <span class="nav-icon">📜</span>
+                        <span class="nav-label">Certifications</span>
+                    </a>
+                    <a href="#section-achievements" class="nav-item" data-target="panel-achievements">
+                        <span class="nav-icon">🏆</span>
+                        <span class="nav-label">Achievements</span>
+                    </a>
+                    <a href="#section-preview" class="nav-item" data-target="panel-preview">
+                        <span class="nav-icon">📄</span>
+                        <span class="nav-label">Resume Preview</span>
+                    </a>
+                    <a href="#section-analytics" class="nav-item" data-target="panel-analytics">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Speech Analytics</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="score-mini">
+                        <div class="score-mini-label">Resume Completeness</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="sidebar-score-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="score-mini-value" id="sidebar-score-text">0%</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Workspace Content Grid (3 Columns on Large Screens) -->
+            <main class="content-workspace">
+                
+                <!-- Column 1: Voice Input & Controls -->
+                <section class="workspace-card pane-voice">
+                    <div class="card-header">
+                        <h2><span class="header-icon">🎤</span> Voice Input System</h2>
+                        <span class="badge badge-live" id="rec-status-badge">Idle</span>
+                    </div>
+                    
+                    <div class="voice-hero-card">
+                        <p class="voice-instruction" id="voice-prompt">"Tell me about yourself..."</p>
+                        
+                        <!-- Animated Microphone Button -->
+                        <div class="mic-button-wrapper">
+                            <button id="btn-toggle-record" class="mic-main-btn" title="Click to Start/Stop Voice Input">
+                                <span class="mic-symbol">🎙️</span>
+                                <span class="mic-pulse-ring"></span>
+                            </button>
+                        </div>
+                        
+                        <div class="voice-state-text" id="voice-state-desc">Click microphone to start listening</div>
+
+                        <!-- Animated Waveform -->
+                        <div class="waveform-container" id="waveform">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+
+                        <!-- Voice Controls -->
+                        <div class="voice-actions">
+                            <button id="btn-start-rec" class="btn btn-sm btn-success">🎤 Start</button>
+                            <button id="btn-stop-rec" class="btn btn-sm btn-warning" disabled>⏹ Stop</button>
+                            <button id="btn-clear-transcript" class="btn btn-sm btn-secondary">🔄 Clear</button>
+                        </div>
+                    </div>
+
+                    <!-- Live Transcription Display -->
+                    <div class="transcription-container">
+                        <div class="transcription-header">
+                            <h3>Live Transcription</h3>
+                            <button id="btn-extract-now" class="btn btn-xs btn-primary">🧠 Extract Info Now</button>
+                        </div>
+                        <div class="transcription-box" id="live-transcription-box" contenteditable="true" placeholder="Your spoken words will appear here in real-time. You can also edit text directly..."></div>
+                        <div class="transcription-footer">
+                            <small class="text-muted">💡 Tip: Speak continuously or dictate specific sections like "Add Python to my skills".</small>
+                        </div>
+                    </div>
+
+                    <!-- Voice Command Log -->
+                    <div class="command-log-container">
+                        <div class="command-log-header">
+                            <h3>Voice Command Log</h3>
+                            <span class="badge" id="cmd-count">0 Commands</span>
+                        </div>
+                        <div class="command-log-body" id="command-log-list">
+                            <div class="cmd-item system">System initialized. Listening for commands like "Add Python to my skills", "Add project", "Download resume".</div>
+                        </div>
+                    </div>
+
+                    <!-- Browser Limitation Banner -->
+                    <div class="browser-disclaimer">
+                        <small>⚠️ Voice recognition uses the browser's Web Speech API. Microphone permission is required, and speech recognition availability may vary by browser.</small>
+                    </div>
+                </section>
+
+                <!-- Column 2: Extracted Information & Field Editors -->
+                <section class="workspace-card pane-extracted">
+                    <div class="card-header">
+                        <h2><span class="header-icon">📝</span> Smart Information Extraction</h2>
+                        <button id="btn-auto-fill-extracted" class="btn btn-xs btn-accent">⚡ Re-parse Text</button>
+                    </div>
+
+                    <!-- Section Tabs Header -->
+                    <div class="editor-tabs">
+                        <button class="editor-tab active" data-tab="tab-personal">Personal</button>
+                        <button class="editor-tab" data-tab="tab-objective">Objective</button>
+                        <button class="editor-tab" data-tab="tab-education">Education</button>
+                        <button class="editor-tab" data-tab="tab-skills">Skills</button>
+                        <button class="editor-tab" data-tab="tab-projects">Projects</button>
+                        <button class="editor-tab" data-tab="tab-experience">Experience</button>
+                        <button class="editor-tab" data-tab="tab-certs">Certs & More</button>
+                    </div>
+
+                    <!-- Tab Contents Container -->
+                    <div class="editor-content">
+                        
+                        <!-- TAB: Personal Information -->
+                        <div class="tab-pane active" id="tab-personal">
+                            <h3>Personal Information</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="input-name">Full Name</label>
+                                    <input type="text" id="input-name" placeholder="e.g. Shyam N">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-email">Email Address</label>
+                                    <input type="email" id="input-email" placeholder="e.g. shyam@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-phone">Phone Number</label>
+                                    <input type="text" id="input-phone" placeholder="e.g. +91 98765 43210">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-location">Location</label>
+                                    <input type="text" id="input-location" placeholder="e.g. Chennai, India">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-linkedin">LinkedIn Profile</label>
+                                    <input type="text" id="input-linkedin" placeholder="e.g. linkedin.com/in/shyam">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-github">GitHub Profile</label>
+                                    <input type="text" id="input-github" placeholder="e.g. github.com/shyam">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: Objective -->
+                        <div class="tab-pane" id="tab-objective">
+                            <div class="tab-header-flex">
+                                <h3>Career Objective</h3>
+                                <button id="btn-generate-objective" class="btn btn-xs btn-outline">✨ Auto-Generate</button>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-objective">Professional Summary / Objective</label>
+                                <textarea id="input-objective" rows="4" placeholder="Enter or speak your career objective..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- TAB: Education -->
+                        <div class="tab-pane" id="tab-education">
+                            <div class="tab-header-flex">
+                                <h3>Education</h3>
+                                <button id="btn-add-education" class="btn btn-xs btn-primary">+ Add Education</button>
+                            </div>
+                            <div id="education-list-container" class="dynamic-list">
+                                <!-- Dynamic Education Items inserted via JS -->
+                            </div>
+                        </div>
+
+                        <!-- TAB: Skills -->
+                        <div class="tab-pane" id="tab-skills">
+                            <div class="tab-header-flex">
+                                <h3>Technical Skills</h3>
+                                <button id="btn-clear-skills" class="btn btn-xs btn-outline-danger">Clear All</button>
+                            </div>
+                            <div class="skills-input-wrapper">
+                                <input type="text" id="input-new-skill" placeholder="Type a skill and press Enter (e.g. Python, SQL)...">
+                                <button id="btn-add-skill" class="btn btn-sm btn-primary">Add</button>
+                            </div>
+                            <div class="skills-tag-cloud" id="skills-tag-cloud">
+                                <!-- Dynamic Skill Chips inserted via JS -->
+                            </div>
+                        </div>
+
+                        <!-- TAB: Projects -->
+                        <div class="tab-pane" id="tab-projects">
+                            <div class="tab-header-flex">
+                                <h3>Projects</h3>
+                                <button id="btn-add-project" class="btn btn-xs btn-primary">+ Add Project</button>
+                            </div>
+                            <div id="projects-list-container" class="dynamic-list">
+                                <!-- Dynamic Projects inserted via JS -->
+                            </div>
+                        </div>
+
+                        <!-- TAB: Experience -->
+                        <div class="tab-pane" id="tab-experience">
+                            <div class="tab-header-flex">
+                                <h3>Work / Internship Experience</h3>
+                                <button id="btn-add-experience" class="btn btn-xs btn-primary">+ Add Experience</button>
+                            </div>
+                            <div id="experience-list-container" class="dynamic-list">
+                                <!-- Dynamic Experience inserted via JS -->
+                            </div>
+                        </div>
+
+                        <!-- TAB: Certs, Achievements & Hobbies -->
+                        <div class="tab-pane" id="tab-certs">
+                            <div class="tab-header-flex">
+                                <h3>Certifications</h3>
+                                <button id="btn-add-cert" class="btn btn-xs btn-primary">+ Add Cert</button>
+                            </div>
+                            <div id="certs-list-container" class="dynamic-list mb-4"></div>
+
+                            <div class="tab-header-flex">
+                                <h3>Achievements</h3>
+                                <button id="btn-add-achievement" class="btn btn-xs btn-primary">+ Add Achievement</button>
+                            </div>
+                            <div id="achievements-list-container" class="dynamic-list mb-4"></div>
+
+                            <div class="form-group">
+                                <label for="input-hobbies">Hobbies & Interests (comma separated)</label>
+                                <input type="text" id="input-hobbies" placeholder="e.g. Open Source, Chess, Blogging">
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Column 3: Live Preview & Quality Analytics -->
+                <section class="workspace-card pane-preview">
+                    
+                    <!-- Quality Score Card -->
+                    <div class="score-card">
+                        <div class="score-header">
+                            <div>
+                                <h3>AI Resume Score</h3>
+                                <span class="score-subtitle">Completeness Analysis</span>
+                            </div>
+                            <div class="score-badge" id="score-percentage-badge">0%</div>
+                        </div>
+                        <div class="score-progress-bar">
+                            <div class="score-fill" id="main-score-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="score-suggestions" id="score-suggestions-list">
+                            <div class="suggestion-item info">⚡ Speak or fill personal details to boost score.</div>
+                        </div>
+                    </div>
+
+                    <!-- Voice & Text Analysis Dashboard -->
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <h3>📊 Speech & Text Analytics</h3>
+                        </div>
+                        <div class="analytics-grid">
+                            <div class="analytic-item">
+                                <span class="val" id="stat-words">0</span>
+                                <span class="lbl">Words Detected</span>
+                            </div>
+                            <div class="analytic-item">
+                                <span class="val" id="stat-skills">0</span>
+                                <span class="lbl">Skills Identified</span>
+                            </div>
+                            <div class="analytic-item">
+                                <span class="val" id="stat-edu">0</span>
+                                <span class="lbl">Education Count</span>
+                            </div>
+                            <div class="analytic-item">
+                                <span class="val" id="stat-proj">0</span>
+                                <span class="lbl">Projects Count</span>
+                            </div>
+                            <div class="analytic-item">
+                                <span class="val" id="stat-duration">0s</span>
+                                <span class="lbl">Speech Duration</span>
+                            </div>
+                            <div class="analytic-item">
+                                <span class="val" id="stat-confidence">0%</span>
+                                <span class="lbl">NLP Confidence</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Resume Sheet Preview Container -->
+                    <div class="resume-preview-wrapper">
+                        <div class="preview-toolbar">
+                            <span>📄 Live Resume Sheet (A4 Format)</span>
+                            <div class="preview-actions">
+                                <button id="btn-print-preview" class="btn btn-xs btn-primary">🖨️ Print / Download</button>
+                            </div>
+                        </div>
+
+                        <!-- Printable Sheet -->
+                        <div class="resume-paper modern-template" id="resume-preview-sheet">
+                            
+                            <!-- Resume Header -->
+                            <div class="res-header">
+                                <h1 id="res-display-name">YOUR NAME</h1>
+                                <div class="res-contact-row" id="res-display-contact">
+                                    <span id="res-phone">phone</span>
+                                    <span id="res-email">email</span>
+                                    <span id="res-location">location</span>
+                                    <span id="res-linkedin">linkedin</span>
+                                    <span id="res-github">github</span>
+                                </div>
+                            </div>
+
+                            <!-- Career Objective -->
+                            <div class="res-section" id="res-sec-objective">
+                                <h2 class="res-sec-title">CAREER OBJECTIVE</h2>
+                                <p id="res-display-objective" class="res-text">Your professional summary will appear here...</p>
+                            </div>
+
+                            <!-- Technical Skills -->
+                            <div class="res-section" id="res-sec-skills">
+                                <h2 class="res-sec-title">TECHNICAL SKILLS</h2>
+                                <div id="res-display-skills" class="res-skills-flex">
+                                    <!-- Dynamic skill badges inserted here -->
+                                </div>
+                            </div>
+
+                            <!-- Education -->
+                            <div class="res-section" id="res-sec-education">
+                                <h2 class="res-sec-title">EDUCATION</h2>
+                                <div id="res-display-education" class="res-list-block">
+                                    <!-- Dynamic education items -->
+                                </div>
+                            </div>
+
+                            <!-- Projects -->
+                            <div class="res-section" id="res-sec-projects">
+                                <h2 class="res-sec-title">PROJECTS</h2>
+                                <div id="res-display-projects" class="res-list-block">
+                                    <!-- Dynamic project items -->
+                                </div>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="res-section" id="res-sec-experience">
+                                <h2 class="res-sec-title">EXPERIENCE</h2>
+                                <div id="res-display-experience" class="res-list-block">
+                                    <!-- Dynamic experience items -->
+                                </div>
+                            </div>
+
+                            <!-- Certifications -->
+                            <div class="res-section" id="res-sec-certifications">
+                                <h2 class="res-sec-title">CERTIFICATIONS</h2>
+                                <div id="res-display-certifications" class="res-list-block">
+                                    <!-- Dynamic cert items -->
+                                </div>
+                            </div>
+
+                            <!-- Achievements -->
+                            <div class="res-section" id="res-sec-achievements">
+                                <h2 class="res-sec-title">ACHIEVEMENTS</h2>
+                                <div id="res-display-achievements" class="res-list-block">
+                                    <!-- Dynamic achievement items -->
+                                </div>
+                            </div>
+
+                            <!-- Hobbies -->
+                            <div class="res-section" id="res-sec-hobbies">
+                                <h2 class="res-sec-title">HOBBIES & INTERESTS</h2>
+                                <p id="res-display-hobbies" class="res-text"></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </section>
+
+            </main>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
